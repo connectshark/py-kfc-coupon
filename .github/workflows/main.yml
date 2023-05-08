@@ -1,0 +1,33 @@
+name: Fetch new data
+
+on:
+  workflow_dispatch:
+
+jobs:
+  save-output:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Install pipenv
+      run: pipx install pipenv
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.8'
+        cache: 'pipenv'
+    - run: pipenv install
+
+    - name: Run program and generate output
+      run: |
+        pipenv run python kfc.py
+        mv -f coupon.json json/coupon.json
+
+    - name: Commit and push changes
+      uses: EndBug/add-and-commit@v9
+      with:
+        add: 'coupon.json'
+        message: 'daily update coupon informations'
+        committer_name: GitHub Actions
+        committer_email: ${{ secrets.EMAIL }}
